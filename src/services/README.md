@@ -1,2 +1,2 @@
 # Services
-Place shared API services here if not using a feature-based structure. DTOs and API clients fit well here.
+Place shared API services that are used across multiple features. DTOs and API clients that are not feature-specific also belong here.
