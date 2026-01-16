@@ -1,10 +1,10 @@
 import BackGroundColor from "../../components/BackGroundColor"
-import Dashboard from "./dashboard"
+import Schema from "./schema"
 
 export default function index() {
     return (
         <BackGroundColor>
-            <Dashboard />
+            <Schema />
         </BackGroundColor>
     )
 }

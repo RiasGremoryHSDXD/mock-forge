@@ -1,10 +1,10 @@
 import BackGroundColor from "../../components/BackGroundColor"
-import Dashboard from "./dashboard"
+import Template from "./template"
 
 export default function index() {
     return (
         <BackGroundColor>
-            <Dashboard />
+            <Template />
         </BackGroundColor>
     )
 }
