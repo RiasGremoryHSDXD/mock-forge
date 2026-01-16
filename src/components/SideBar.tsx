@@ -24,9 +24,22 @@ export default function SideBar({ pageName = "Dashboard" }: SideBarProps) {
         >
 
             <div
-                className="border-b border-gray-700 h-[10vh] flex items-center justify-between p-4"
+                className={`border-b border-gray-700 h-[10vh] flex items-center justify-between transition-all duration-300 ${isSideBarOpen ? "p-4" : "px-2"}`}
             >
-                <h1 className={`text-white text-xl font-semibold transition-all duration-300 overflow-hidden whitespace-nowrap ${isSideBarOpen ? "max-w-[200px] opacity-100" : "max-w-0 opacity-0"}`}>{pageName}</h1>
+                <div className="flex items-center">
+                    <h1
+                        className={`text-white text-xl font-semibold transition-all duration-300 overflow-hidden whitespace-nowrap 
+                        ${isSideBarOpen ? "max-w-[200px] opacity-100" : "max-w-0 opacity-0"}`}
+                    >
+                        {pageName}
+                    </h1>
+                    <span
+                        className={`text-white text-xl font-bold bg-gray-800 rounded-md w-8 h-8 flex items-center justify-center transition-all duration-300
+                        ${!isSideBarOpen ? "opacity-100 scale-100" : "opacity-0 scale-0 hidden"}`}
+                    >
+                        {pageName.charAt(0)}
+                    </span>
+                </div>
 
                 {
                     isSideBarOpen ?
