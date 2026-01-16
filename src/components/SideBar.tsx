@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, LayoutDashboard, Sheet, FileText } from "lucide-react"
 
 
@@ -10,7 +10,7 @@ interface SideBarProps {
 export default function SideBar({ pageName = "Dashboard" }: SideBarProps) {
     const [isSideBarOpen, setIsSideBarOpen] = useState(true);
 
-    const navigate = useNavigate();
+
 
     const menuItems = [
         { name: "Dashboard", icon: LayoutDashboard, path: "/home" },
