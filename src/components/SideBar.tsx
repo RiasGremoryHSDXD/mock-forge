@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, LayoutDashboard, Sheet, FileText } from "lucide-react"
 
@@ -8,7 +8,14 @@ interface SideBarProps {
 }
 
 export default function SideBar({ pageName = "Dashboard" }: SideBarProps) {
-    const [isSideBarOpen, setIsSideBarOpen] = useState(true);
+    const [isSideBarOpen, setIsSideBarOpen] = useState(() => {
+        const saved = localStorage.getItem("isSideBarOpen");
+        return saved !== null ? JSON.parse(saved) : true;
+    });
+
+    useEffect(() => {
+        localStorage.setItem("isSideBarOpen", JSON.stringify(isSideBarOpen));
+    }, [isSideBarOpen]);
 
 
 
