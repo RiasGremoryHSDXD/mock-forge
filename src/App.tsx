@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { ProtectedRoute } from "./components/ProtectedRoute"
 import Login from "./pages/auth/index"
 import Home from "./pages/Home"
-import { ProtectedRoute } from "./components/ProtectedRoute"
+import Schema from "./pages/Schema"
+import Template from "./pages/Template"
 
 function App() {
 
@@ -10,6 +12,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/home" element={<ProtectedRoute children={<Home />} />} />
+        <Route path="/schema" element={<ProtectedRoute children={<Schema />} />} />
+        <Route path="/template" element={<ProtectedRoute children={<Template />} />} />
       </Routes>
     </BrowserRouter>
   )

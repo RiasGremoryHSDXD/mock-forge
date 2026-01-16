@@ -1,10 +1,10 @@
-import type { BackGroundColorProps } from "../../types/components/ui/Background"
+import type { BackgroundColorProps } from "../types/components/ui/Background"
 
 
 export default function BackGroundColor({
     children,
     color = "bg-[#020617]"
-}: BackGroundColorProps) {
+}: BackgroundColorProps) {
     return (
         <div
             className={`${color} w-[100vw] h-[100vh]`}

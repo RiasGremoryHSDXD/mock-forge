@@ -1,4 +1,4 @@
-import BackGroundColor from "../../components/ui/BackGroundColor"
+import BackGroundColor from "../../components/BackGroundColor"
 import Login from "./login"
 
 export default function inde() {
