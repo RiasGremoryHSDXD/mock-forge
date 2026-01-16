@@ -1,15 +1,17 @@
+import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/websiteLogo3.png";
 import { useGoogleLogin } from "../../hooks/useGoogleLogin";
+import { setUserFromLocalStorage } from "../../utils/storage";
 
 export default function LoginCard() {
+    const navigate = useNavigate();
     const { login, error } = useGoogleLogin();
 
     const handleGoogleLogin = async () => {
         const user = await login();
         if (user) {
-            console.log(user);
-            alert(`Login Success! Welcome back, ${user.displayName}`);
-            // TODO: Add navigation here later (e.g., navigate('/dashboard'))
+            setUserFromLocalStorage(user);
+            navigate('/home');
         }
     };
 
