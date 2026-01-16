@@ -1,46 +1,15 @@
-import { useState } from "react";
-import { signInWithPopup } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore"; // <--- Database tools
-import { auth, googleProvider, db } from "../../firebase"; // <--- Import 'db' here
 import Logo from "../../assets/websiteLogo3.png";
+import { useGoogleLogin } from "../../hooks/useGoogleLogin";
 
 export default function LoginCard() {
-    const [error, setError] = useState("");
+    const { login, error } = useGoogleLogin();
 
     const handleGoogleLogin = async () => {
-        try {
-            // 1. Authenticate with Google
-            const result = await signInWithPopup(auth, googleProvider);
-            const user = result.user;
-
-            // 2. Reference the database
-            // We look for a document in the "users" collection with the same ID as the user
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-
-            // 3. If user does NOT exist, create them
-            if (!userSnap.exists()) {
-                await setDoc(userRef, {
-                    uid: user.uid,
-                    name: user.displayName,
-                    email: user.email,
-                    photoURL: user.photoURL,
-                    createdAt: new Date().toISOString(),
-                    credits: 500, // Giving them free credits for your SaaS
-                    plan: "free"
-                });
-                console.log("New User Created in Database");
-            } else {
-                console.log("User already exists. Logging in...");
-            }
-
-            // 4. Success UI
+        const user = await login();
+        if (user) {
+            console.log(user);
             alert(`Login Success! Welcome back, ${user.displayName}`);
             // TODO: Add navigation here later (e.g., navigate('/dashboard'))
-
-        } catch (err: any) {
-            console.error("Login Error:", err);
-            setError("Login failed. Check console for details.");
         }
     };
 
