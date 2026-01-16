@@ -20,7 +20,7 @@ export default function SideBar({ pageName = "Dashboard" }: SideBarProps) {
 
     return (
         <div
-            className={`border-r border-gray-700 h-[100vh] transition-all duration-300 ease-in-out ${isSideBarOpen ? "w-[16vw]" : "w-[6vw]"}`}
+            className={`border-r border-gray-700 h-[100vh] transition-all duration-300 ease-in-out shrink-0 ${isSideBarOpen ? "w-64" : "w-20"}`}
         >
 
             <div
