@@ -108,25 +108,27 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                 <div className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-700/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-600">
                     {messages.map((msg, index) => (
                         <div key={index} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                            {msg.role === 'model' ? (
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 flex items-center justify-center shrink-0 border border-blue-500/30">
-                                    <Sparkles className="w-4 h-4 text-blue-400" />
-                                </div>
-                            ) : (
-                                <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-700">
-                                    {localStorage.getItem("user_photoURL") ? (
-                                        <img
-                                            src={localStorage.getItem("user_photoURL")!}
-                                            alt="User"
-                                            className="w-full h-full object-cover"
-                                        />
+                            <div className="relative w-9 h-9 flex items-center justify-center shrink-0 group cursor-pointer">
+                                <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent_0_340deg,white_360deg)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-spin-slow"></div>
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#4285F4] via-[#DB4437] to-[#0F9D58] opacity-30 blur-[1px] group-hover:opacity-80 group-hover:blur-sm transition-all duration-500"></div>
+                                <div className="relative w-[calc(100%-4px)] h-[calc(100%-4px)] rounded-full overflow-hidden border border-gray-700/50 bg-[#0f172a] z-10 flex items-center justify-center">
+                                    {msg.role === 'model' ? (
+                                        <Sparkles className="w-4 h-4 text-blue-400" />
                                     ) : (
-                                        <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                                            <div className="w-4 h-4 rounded-full bg-gray-400" />
-                                        </div>
+                                        localStorage.getItem("user_photoURL") ? (
+                                            <img
+                                                src={localStorage.getItem("user_photoURL")!}
+                                                alt="User"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
+                                                U
+                                            </div>
+                                        )
                                     )}
                                 </div>
-                            )}
+                            </div>
 
                             <div className={`flex-1 ${msg.role === 'user' ? 'text-right' : ''}`}>
                                 <div className={`inline-block text-sm leading-relaxed px-4 py-2 rounded-2xl ${msg.role === 'user'
@@ -153,8 +155,12 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                     ))}
                     {isLoading && (
                         <div className="flex gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 flex items-center justify-center shrink-0 border border-blue-500/30">
-                                <Sparkles className="w-4 h-4 text-blue-400" />
+                            <div className="relative w-9 h-9 flex items-center justify-center shrink-0 group cursor-pointer">
+                                <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent_0_340deg,white_360deg)] opacity-100 transition-opacity duration-500 animate-spin-slow"></div>
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#4285F4] via-[#DB4437] to-[#0F9D58] opacity-80 blur-[1px] transition-all duration-500"></div>
+                                <div className="relative w-[calc(100%-4px)] h-[calc(100%-4px)] rounded-full overflow-hidden border border-gray-700/50 bg-[#0f172a] z-10 flex items-center justify-center">
+                                    <Sparkles className="w-4 h-4 text-blue-400" />
+                                </div>
                             </div>
                             <div className="flex items-center">
                                 <div className="bg-gray-800/80 backdrop-blur-sm px-5 py-3 rounded-full flex items-center gap-2 border border-gray-700/30 shadow-lg">
