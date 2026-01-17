@@ -69,12 +69,16 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
     return (
         <>
             {/* Collapsed Trigger Button - Now below profile */}
+            {/* Collapsed Trigger Button - Now below profile */}
             <div
                 onClick={() => setIsChatOpen(true)}
-                className={`mt-4 transition-all duration-500 transform ${isChatOpen ? "opacity-0 scale-50 pointer-events-none absolute" : "opacity-100 scale-100 relative"
-                    } flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.2)] cursor-pointer hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] group`}
+                className={`mt-4 relative group w-10 h-10 transition-all duration-500 transform ${isChatOpen ? "opacity-0 scale-50 pointer-events-none absolute" : "opacity-100 scale-100 relative"
+                    } cursor-pointer`}
             >
-                <Sparkles className="cursor-pointer w-6 h-6 text-blue-400 fill-blue-400/20 animate-breathe group-hover:scale-110 transition-transform" />
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-[#4285F4] via-[#DB4437] to-[#0F9D58] rounded-full opacity-75 group-hover:opacity-100 transition-opacity duration-300 blur-[1px] animate-gradient-x"></div>
+                <div className="relative w-full h-full bg-[#0f172a] rounded-full flex items-center justify-center border border-gray-800">
+                    <Sparkles className="w-5 h-5 text-blue-400 group-hover:text-[#4285F4] transition-colors" />
+                </div>
             </div>
 
             {/* Chat Interface Container */}
