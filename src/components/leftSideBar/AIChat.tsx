@@ -1,25 +1,89 @@
-import { Sparkles, Send, X, History, Plus } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from 'react-markdown';
+import { Sparkles, Send, X, History, Plus } from "lucide-react"; // Removed unused User import
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { aiConfig } from "../../../api/aiConfig";
+
 
 interface AIChatProps {
     isChatOpen: boolean;
     setIsChatOpen: (isOpen: boolean) => void;
 }
 
+interface Message {
+    role: 'user' | 'model';
+    text: string;
+}
+
 export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
+    const [messages, setMessages] = useState<Message[]>([
+        { role: 'model', text: "Hello! I'm Gemini. How can I help you today?" }
+    ]);
+    const [input, setInput] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    // Auto-scroll to bottom when messages change
+    useEffect(() => {
+        if (isChatOpen) {
+            scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages, isChatOpen]);
+
+    const handleSend = async () => {
+        if (!input.trim() || isLoading) return;
+
+        const userText = input;
+        setInput("");
+        setMessages(prev => [...prev, { role: 'user', text: userText }]);
+        setIsLoading(true);
+
+        try {
+            const apiKey = aiConfig.apiKey;
+            if (!apiKey) {
+                throw new Error("API Key not found");
+            }
+
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: aiConfig.model });
+            const result = await model.generateContent(userText);
+            const response = await result.response;
+            const text = response.text();
+
+            setMessages(prev => [...prev, { role: 'model', text: text }]);
+        } catch (error) {
+            console.error("Gemini API Error:", error);
+            setMessages(prev => [...prev, { role: 'model', text: "Sorry, I encountered an error. Please check your API key and try again." }]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    };
+
     return (
         <>
             {/* Collapsed Trigger Button - Now below profile */}
+            {/* Collapsed Trigger Button - Now below profile */}
             <div
                 onClick={() => setIsChatOpen(true)}
-                className={`mt-4 transition-all duration-500 transform ${isChatOpen ? "opacity-0 scale-50 pointer-events-none absolute" : "opacity-100 scale-100 relative"
-                    } flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.2)] cursor-pointer hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] group`}
+                className={`mt-4 relative group w-10 h-10 transition-all duration-500 transform ${isChatOpen ? "opacity-0 scale-50 pointer-events-none absolute" : "opacity-100 scale-100 relative"
+                    } cursor-pointer`}
             >
-                <Sparkles className="cursor-pointer w-6 h-6 text-blue-400 fill-blue-400/20 animate-breathe group-hover:scale-110 transition-transform" />
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-[#4285F4] via-[#DB4437] to-[#0F9D58] rounded-full opacity-75 group-hover:opacity-100 transition-opacity duration-300 blur-[1px] animate-gradient-x"></div>
+                <div className="relative w-full h-full bg-[#0f172a] rounded-full flex items-center justify-center border border-gray-800">
+                    <Sparkles className="w-5 h-5 text-blue-400 group-hover:text-[#4285F4] transition-colors" />
+                </div>
             </div>
 
             {/* Chat Interface Container */}
             <div
-                className={`flex-1 w-full px-4 flex flex-col transition-all duration-500 delay-100 ${isChatOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none absolute bottom-0 left-0"
+                className={`flex-1 min-h-0 w-full px-4 flex flex-col transition-all duration-500 delay-100 ${isChatOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none absolute bottom-0 left-0"
                     }`}
             >
                 {/* Chat Header */}
@@ -41,33 +105,100 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                 </div>
 
                 {/* Chat Messages */}
-                <div className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-                    {/* AI Message */}
-                    <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 flex items-center justify-center shrink-0 border border-blue-500/30">
-                            <Sparkles className="w-4 h-4 text-blue-400" />
-                        </div>
-                        <div className="flex-1">
-                            <div className="text-gray-300 text-sm leading-relaxed">
-                                <p>Hello! I'm Gemini. How can I help you today?</p>
+                <div className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-700/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-600">
+                    {messages.map((msg, index) => (
+                        <div key={index} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                            <div className="relative w-9 h-9 flex items-center justify-center shrink-0 group cursor-pointer">
+                                <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent_0_340deg,white_360deg)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-spin-slow"></div>
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#4285F4] via-[#DB4437] to-[#0F9D58] opacity-30 blur-[1px] group-hover:opacity-80 group-hover:blur-sm transition-all duration-500"></div>
+                                <div className="relative w-[calc(100%-4px)] h-[calc(100%-4px)] rounded-full overflow-hidden border border-gray-700/50 bg-[#0f172a] z-10 flex items-center justify-center">
+                                    {msg.role === 'model' ? (
+                                        <Sparkles className="w-4 h-4 text-blue-400" />
+                                    ) : (
+                                        localStorage.getItem("user_photoURL") ? (
+                                            <img
+                                                src={localStorage.getItem("user_photoURL")!}
+                                                alt="User"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
+                                                U
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className={`flex-1 ${msg.role === 'user' ? 'text-right' : ''}`}>
+                                <div className={`inline-block text-sm leading-relaxed px-4 py-2 rounded-2xl ${msg.role === 'user'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-800/50 text-gray-300'
+                                    }`}>
+                                    <ReactMarkdown
+                                        components={{
+                                            ul: ({ node, ...props }: any) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
+                                            ol: ({ node, ...props }: any) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
+                                            li: ({ node, ...props }: any) => <li className="mb-0.5" {...props} />,
+                                            h1: ({ node, ...props }: any) => <h1 className="text-lg font-bold mb-2 mt-4" {...props} />,
+                                            h2: ({ node, ...props }: any) => <h2 className="text-base font-bold mb-2 mt-3" {...props} />,
+                                            h3: ({ node, ...props }: any) => <h3 className="text-sm font-bold mb-1 mt-2" {...props} />,
+                                            strong: ({ node, ...props }: any) => <span className="font-bold text-white" {...props} />,
+                                            p: ({ node, ...props }: any) => <p className="mb-2 last:mb-0" {...props} />,
+                                        }}
+                                    >
+                                        {msg.text}
+                                    </ReactMarkdown>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    ))}
+                    {isLoading && (
+                        <div className="flex gap-3">
+                            <div className="relative w-9 h-9 flex items-center justify-center shrink-0 group cursor-pointer">
+                                <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent_0_340deg,white_360deg)] opacity-100 transition-opacity duration-500 animate-spin-slow"></div>
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#4285F4] via-[#DB4437] to-[#0F9D58] opacity-80 blur-[1px] transition-all duration-500"></div>
+                                <div className="relative w-[calc(100%-4px)] h-[calc(100%-4px)] rounded-full overflow-hidden border border-gray-700/50 bg-[#0f172a] z-10 flex items-center justify-center">
+                                    <Sparkles className="w-4 h-4 text-blue-400" />
+                                </div>
+                            </div>
+                            <div className="flex items-center">
+                                <div className="bg-gray-800/80 backdrop-blur-sm px-5 py-3 rounded-full flex items-center gap-2 border border-gray-700/30 shadow-lg">
+                                    <div className="w-2.5 h-2.5 rounded-full bg-[#4285F4] animate-loader-dots [animation-delay:0ms]"></div>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-[#DB4437] animate-loader-dots [animation-delay:150ms]"></div>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-[#F4B400] animate-loader-dots [animation-delay:300ms]"></div>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-[#0F9D58] animate-loader-dots [animation-delay:450ms]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <div ref={scrollRef} />
                 </div>
 
                 {/* Chat Input */}
-                <div className="relative mt-auto mb-4">
-                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <Plus size={18} className="text-gray-400" />
+                <div className="relative mt-auto mb-4 group">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-[#4285F4] via-[#DB4437] to-[#0F9D58] rounded-full opacity-75 group-focus-within:opacity-100 transition-opacity duration-300 blur-[1px] animate-gradient-x -z-10"></div>
+                    <div className="relative bg-[#0f172a] rounded-full flex items-center">
+                        <div className="pl-4 pr-2 text-gray-400">
+                            <Plus size={18} />
+                        </div>
+                        <input
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Ask Gemini"
+                            disabled={isLoading}
+                            className="w-full bg-transparent text-white py-3 pr-12 focus:outline-none placeholder:text-gray-500 disabled:opacity-50"
+                        />
+                        <button
+                            onClick={handleSend}
+                            disabled={isLoading || !input.trim()}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white text-gray-900 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <Send size={16} fill="currentColor" />
+                        </button>
                     </div>
-                    <input
-                        type="text"
-                        placeholder="Ask Gemini"
-                        className="w-full bg-[#0f172a] text-white rounded-full py-3 pr-12 pl-10 border border-gray-700 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-500"
-                    />
-                    <button className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white text-gray-900 rounded-full hover:bg-gray-200 transition-colors">
-                        <Send size={16} fill="currentColor" />
-                    </button>
                 </div>
             </div>
         </>
