@@ -1,5 +1,5 @@
 import SideBar from "../../components/SideBar"
-import LeftSideBar from "../../components/LeftSideBar"
+import LeftSideBar from "../../components/leftSideBar/LeftSideBar"
 
 export default function dashboard() {
     return (
