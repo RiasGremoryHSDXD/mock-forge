@@ -40,3 +40,21 @@
 .animate-spin-slow {
   animation: spin 3s linear infinite;
 }
+
+@keyframes sleek-bounce {
+
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: translateY(-5px) scale(1.1);
+    opacity: 1;
+  }
+}
+
+.animate-loader-dots {
+  animation: sleek-bounce 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}

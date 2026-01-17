@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
-import { Sparkles, Send, X, History, Plus, Loader2 } from "lucide-react"; // Removed unused User import
+import { Sparkles, Send, X, History, Plus } from "lucide-react"; // Removed unused User import
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { aiConfig } from "../../../api/aiConfig";
 
@@ -157,7 +157,12 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                                 <Sparkles className="w-4 h-4 text-blue-400" />
                             </div>
                             <div className="flex items-center">
-                                <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                                <div className="bg-gray-800/80 backdrop-blur-sm px-5 py-3 rounded-full flex items-center gap-2 border border-gray-700/30 shadow-lg">
+                                    <div className="w-2.5 h-2.5 rounded-full bg-[#4285F4] animate-loader-dots [animation-delay:0ms]"></div>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-[#DB4437] animate-loader-dots [animation-delay:150ms]"></div>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-[#F4B400] animate-loader-dots [animation-delay:300ms]"></div>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-[#0F9D58] animate-loader-dots [animation-delay:450ms]"></div>
+                                </div>
                             </div>
                         </div>
                     )}
