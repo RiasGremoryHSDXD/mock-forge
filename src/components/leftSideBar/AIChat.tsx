@@ -161,26 +161,29 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                 </div>
 
                 {/* Chat Input */}
-                <div className="relative mt-auto mb-4">
-                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <Plus size={18} className="text-gray-400" />
+                <div className="relative mt-auto mb-4 group">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-[#4285F4] via-[#DB4437] to-[#0F9D58] rounded-full opacity-75 group-focus-within:opacity-100 transition-opacity duration-300 blur-[1px] animate-gradient-x -z-10"></div>
+                    <div className="relative bg-[#0f172a] rounded-full flex items-center">
+                        <div className="pl-4 pr-2 text-gray-400">
+                            <Plus size={18} />
+                        </div>
+                        <input
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Ask Gemini"
+                            disabled={isLoading}
+                            className="w-full bg-transparent text-white py-3 pr-12 focus:outline-none placeholder:text-gray-500 disabled:opacity-50"
+                        />
+                        <button
+                            onClick={handleSend}
+                            disabled={isLoading || !input.trim()}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white text-gray-900 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <Send size={16} fill="currentColor" />
+                        </button>
                     </div>
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Ask Gemini"
-                        disabled={isLoading}
-                        className="w-full bg-[#0f172a] text-white rounded-full py-3 pr-12 pl-10 border border-gray-700 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-500 disabled:opacity-50"
-                    />
-                    <button
-                        onClick={handleSend}
-                        disabled={isLoading || !input.trim()}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white text-gray-900 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <Send size={16} fill="currentColor" />
-                    </button>
                 </div>
             </div>
         </>
