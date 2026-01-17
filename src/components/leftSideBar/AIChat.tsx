@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from 'react-markdown';
 import { Sparkles, Send, X, History, Plus, Loader2 } from "lucide-react"; // Removed unused User import
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { aiConfig } from "../../../api/aiConfig";
@@ -128,7 +129,20 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                                     ? 'bg-blue-600 text-white'
                                     : 'bg-gray-800/50 text-gray-300'
                                     }`}>
-                                    <p>{msg.text}</p>
+                                    <ReactMarkdown
+                                        components={{
+                                            ul: ({ node, ...props }: any) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
+                                            ol: ({ node, ...props }: any) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
+                                            li: ({ node, ...props }: any) => <li className="mb-0.5" {...props} />,
+                                            h1: ({ node, ...props }: any) => <h1 className="text-lg font-bold mb-2 mt-4" {...props} />,
+                                            h2: ({ node, ...props }: any) => <h2 className="text-base font-bold mb-2 mt-3" {...props} />,
+                                            h3: ({ node, ...props }: any) => <h3 className="text-sm font-bold mb-1 mt-2" {...props} />,
+                                            strong: ({ node, ...props }: any) => <span className="font-bold text-white" {...props} />,
+                                            p: ({ node, ...props }: any) => <p className="mb-2 last:mb-0" {...props} />,
+                                        }}
+                                    >
+                                        {msg.text}
+                                    </ReactMarkdown>
                                 </div>
                             </div>
                         </div>
