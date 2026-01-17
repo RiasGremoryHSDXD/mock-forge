@@ -78,7 +78,7 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
 
             {/* Chat Interface Container */}
             <div
-                className={`flex-1 w-full px-4 flex flex-col transition-all duration-500 delay-100 ${isChatOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none absolute bottom-0 left-0"
+                className={`flex-1 min-h-0 w-full px-4 flex flex-col transition-all duration-500 delay-100 ${isChatOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none absolute bottom-0 left-0"
                     }`}
             >
                 {/* Chat Header */}
@@ -100,7 +100,7 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                 </div>
 
                 {/* Chat Messages */}
-                <div className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+                <div className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-700/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-600">
                     {messages.map((msg, index) => (
                         <div key={index} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                             {msg.role === 'model' ? (
