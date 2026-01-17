@@ -108,8 +108,18 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                                     <Sparkles className="w-4 h-4 text-blue-400" />
                                 </div>
                             ) : (
-                                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center shrink-0">
-                                    <div className="w-4 h-4 rounded-full bg-gray-400" />
+                                <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-700">
+                                    {localStorage.getItem("user_photoURL") ? (
+                                        <img
+                                            src={localStorage.getItem("user_photoURL")!}
+                                            alt="User"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                                            <div className="w-4 h-4 rounded-full bg-gray-400" />
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
