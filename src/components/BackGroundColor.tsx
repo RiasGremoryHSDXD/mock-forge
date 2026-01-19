@@ -7,7 +7,7 @@ export default function BackGroundColor({
 }: BackgroundColorProps) {
     return (
         <div
-            className={`${color} w-[100vw] h-[100vh]`}
+            className={`${color} w-screen h-screen overflow-hidden`}
         >
             {children}
         </div>
