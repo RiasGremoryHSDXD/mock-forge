@@ -2,6 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
 import { Sparkles, Send, X, History, Plus } from "lucide-react"; // Removed unused User import
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { auth } from "../../firebase";
+import { chatService } from "../../services/chatService";
+import type { Conversation } from "../../services/chatService";
+import { onAuthStateChanged } from "firebase/auth";
 import { aiConfig } from "../../../api/aiConfig";
 
 
@@ -21,7 +25,36 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
     ]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [conversationId, setConversationId] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
+    const [history, setHistory] = useState<Conversation[]>([]);
+    const [showHistory, setShowHistory] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setUserId(user ? user.uid : null);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    // Save conversation when messages change (if user is logged in)
+    useEffect(() => {
+        const saveChat = async () => {
+            if (userId && messages.length > 1) { // Don't save if only initial greeting
+                try {
+                    const id = await chatService.saveConversation(userId, conversationId, messages);
+                    if (!conversationId) {
+                        setConversationId(id);
+                    }
+                } catch (error) {
+                    console.error("Failed to save chat:", error);
+                }
+            }
+        };
+        const timer = setTimeout(saveChat, 1000); // Debounce save
+        return () => clearTimeout(timer);
+    }, [messages, userId, conversationId]);
 
     // Auto-scroll to bottom when messages change
     useEffect(() => {
@@ -45,7 +78,10 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
             }
 
             const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: aiConfig.model });
+            const model = genAI.getGenerativeModel({
+                model: aiConfig.model,
+                systemInstruction: "You are a specialized AI assistant for the 'mock-forge' application. Your expertise is strictly limited to data APIs, mock data generation, database management, and related technical topics. If a user asks a question outside of this scope (e.g., cooking, general life advice, entertainment), politely refuse and explain that you only answer questions related to data APIs and the mockup application."
+            });
             const result = await model.generateContent(userText);
             const response = await result.response;
             const text = response.text();
@@ -57,6 +93,28 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const toggleHistory = async () => {
+        if (!showHistory) {
+            if (userId) {
+                const chats = await chatService.getUserConversations(userId);
+                setHistory(chats);
+            }
+        }
+        setShowHistory(!showHistory);
+    };
+
+    const loadConversation = (conv: Conversation) => {
+        setMessages(conv.messages);
+        setConversationId(conv.id);
+        setShowHistory(false);
+    };
+
+    const startNewChat = () => {
+        setMessages([{ role: 'model', text: "Hello! I'm Gemini. How can I help you today?" }]);
+        setConversationId(null);
+        setShowHistory(false);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -92,8 +150,19 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                         <span className="text-white font-medium text-lg">Gemini</span>
                     </div>
                     <div className="flex gap-2">
-                        <button className="p-2 hover:bg-gray-800 rounded-full text-white transition-colors">
+                        <button
+                            onClick={toggleHistory}
+                            className="p-2 hover:bg-gray-800 rounded-full text-white transition-colors relative"
+                            title="Chat History"
+                        >
                             <History size={18} />
+                        </button>
+                        <button
+                            onClick={startNewChat}
+                            className="p-2 hover:bg-gray-800 rounded-full text-white transition-colors"
+                            title="New Chat"
+                        >
+                            <Plus size={18} />
                         </button>
                         <button
                             onClick={() => setIsChatOpen(false)}
@@ -105,7 +174,30 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                 </div>
 
                 {/* Chat Messages */}
-                <div className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-700/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-600">
+                <div className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-700/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-600 relative">
+                    {showHistory && (
+                        <div className="absolute inset-0 bg-[#0f172a] z-20 overflow-y-auto">
+                            <h3 className="text-white font-medium mb-4 sticky top-0 bg-[#0f172a] py-2">Chat History</h3>
+                            <div className="space-y-2">
+                                {history.length === 0 ? (
+                                    <p className="text-gray-400 text-sm">No previous conversations.</p>
+                                ) : (
+                                    history.map((chat) => (
+                                        <div
+                                            key={chat.id}
+                                            onClick={() => loadConversation(chat)}
+                                            className="p-3 hover:bg-gray-800 rounded-lg cursor-pointer transition-colors border border-gray-800"
+                                        >
+                                            <p className="text-sm text-white font-medium truncate">{chat.title}</p>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                {chat.updatedAt?.seconds ? new Date(chat.updatedAt.seconds * 1000).toLocaleDateString() : 'Just now'}
+                                            </p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    )}
                     {messages.map((msg, index) => (
                         <div key={index} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                             <div className="relative w-9 h-9 flex items-center justify-center shrink-0 group cursor-pointer">
@@ -179,7 +271,7 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                 <div className="relative mt-auto mb-4 group">
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-[#4285F4] via-[#DB4437] to-[#0F9D58] rounded-full opacity-75 group-focus-within:opacity-100 transition-opacity duration-300 blur-[1px] animate-gradient-x -z-10"></div>
                     <div className="relative bg-[#0f172a] rounded-full flex items-center">
-                        <div className="pl-4 pr-2 text-gray-400">
+                        <div className="pl-4 pr-2 text-gray-400 cursor-pointer hover:text-white transition-colors" onClick={startNewChat}>
                             <Plus size={18} />
                         </div>
                         <input
