@@ -1,63 +1,26 @@
-import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
-import { Sparkles, Send, X, History, Plus } from "lucide-react"; // Removed unused User import
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { aiConfig } from "../../../api/aiConfig";
-
+import { Sparkles, Send, X, History, Plus } from "lucide-react";
+import useAIChat from "../../hooks/useAIChat";
 
 interface AIChatProps {
     isChatOpen: boolean;
     setIsChatOpen: (isOpen: boolean) => void;
 }
 
-interface Message {
-    role: 'user' | 'model';
-    text: string;
-}
-
 export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
-    const [messages, setMessages] = useState<Message[]>([
-        { role: 'model', text: "Hello! I'm Gemini. How can I help you today?" }
-    ]);
-    const [input, setInput] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const scrollRef = useRef<HTMLDivElement>(null);
-
-    // Auto-scroll to bottom when messages change
-    useEffect(() => {
-        if (isChatOpen) {
-            scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [messages, isChatOpen]);
-
-    const handleSend = async () => {
-        if (!input.trim() || isLoading) return;
-
-        const userText = input;
-        setInput("");
-        setMessages(prev => [...prev, { role: 'user', text: userText }]);
-        setIsLoading(true);
-
-        try {
-            const apiKey = aiConfig.apiKey;
-            if (!apiKey) {
-                throw new Error("API Key not found");
-            }
-
-            const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: aiConfig.model });
-            const result = await model.generateContent(userText);
-            const response = await result.response;
-            const text = response.text();
-
-            setMessages(prev => [...prev, { role: 'model', text: text }]);
-        } catch (error) {
-            console.error("Gemini API Error:", error);
-            setMessages(prev => [...prev, { role: 'model', text: "Sorry, I encountered an error. Please check your API key and try again." }]);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const {
+        messages,
+        input,
+        setInput,
+        isLoading,
+        scrollRef,
+        handleSend,
+        history,
+        showHistory,
+        toggleHistory,
+        loadConversation,
+        startNewChat
+    } = useAIChat(isChatOpen);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -92,8 +55,19 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                         <span className="text-white font-medium text-lg">Gemini</span>
                     </div>
                     <div className="flex gap-2">
-                        <button className="p-2 hover:bg-gray-800 rounded-full text-white transition-colors">
+                        <button
+                            onClick={toggleHistory}
+                            className="p-2 hover:bg-gray-800 rounded-full text-white transition-colors relative"
+                            title="Chat History"
+                        >
                             <History size={18} />
+                        </button>
+                        <button
+                            onClick={startNewChat}
+                            className="p-2 hover:bg-gray-800 rounded-full text-white transition-colors"
+                            title="New Chat"
+                        >
+                            <Plus size={18} />
                         </button>
                         <button
                             onClick={() => setIsChatOpen(false)}
@@ -105,7 +79,30 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                 </div>
 
                 {/* Chat Messages */}
-                <div className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-700/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-600">
+                <div className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-700/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-600 relative">
+                    {showHistory && (
+                        <div className="absolute inset-0 bg-[#0f172a] z-20 overflow-y-auto">
+                            <h3 className="text-white font-medium mb-4 sticky top-0 bg-[#0f172a] py-2">Chat History</h3>
+                            <div className="space-y-2">
+                                {history.length === 0 ? (
+                                    <p className="text-gray-400 text-sm">No previous conversations.</p>
+                                ) : (
+                                    history.map((chat) => (
+                                        <div
+                                            key={chat.id}
+                                            onClick={() => loadConversation(chat)}
+                                            className="p-3 hover:bg-gray-800 rounded-lg cursor-pointer transition-colors border border-gray-800"
+                                        >
+                                            <p className="text-sm text-white font-medium truncate">{chat.title}</p>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                {chat.updatedAt?.seconds ? new Date(chat.updatedAt.seconds * 1000).toLocaleDateString() : 'Just now'}
+                                            </p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    )}
                     {messages.map((msg, index) => (
                         <div key={index} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                             <div className="relative w-9 h-9 flex items-center justify-center shrink-0 group cursor-pointer">
@@ -179,7 +176,7 @@ export default function AIChat({ isChatOpen, setIsChatOpen }: AIChatProps) {
                 <div className="relative mt-auto mb-4 group">
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-[#4285F4] via-[#DB4437] to-[#0F9D58] rounded-full opacity-75 group-focus-within:opacity-100 transition-opacity duration-300 blur-[1px] animate-gradient-x -z-10"></div>
                     <div className="relative bg-[#0f172a] rounded-full flex items-center">
-                        <div className="pl-4 pr-2 text-gray-400">
+                        <div className="pl-4 pr-2 text-gray-400 cursor-pointer hover:text-white transition-colors" onClick={startNewChat}>
                             <Plus size={18} />
                         </div>
                         <input
