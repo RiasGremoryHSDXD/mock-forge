@@ -6,7 +6,9 @@ import { useState } from "react"
 const modalButtonDesign = "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
 
 export default function schemaContent() {
-    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+    const [databaseName, setDatabaseName] = useState<string>("")
+
     return (
         <div className="m-2">
             <Button
@@ -15,7 +17,10 @@ export default function schemaContent() {
             />
             {isModalOpen && (
                 <ModalContent>
-                    <CreateDatabase />
+                    <CreateDatabase
+                        databaseName={databaseName}
+                        setDatabaseName={setDatabaseName}
+                    />
 
                     <div className="flex justify-between gap-2 mt-4">
                         <Button
@@ -27,7 +32,7 @@ export default function schemaContent() {
                         <Button
                             buttonText="Create"
                             buttonContainerDesign={modalButtonDesign}
-                            onClick={() => setIsModalOpen(false)}
+                            onClick={() => alert(`Create ${databaseName}`)}
                         />
                     </div>
                 </ModalContent>

@@ -1,11 +1,13 @@
-import { useState } from "react"
+import type { CreateDatabaseProps } from "../../types/pages/Schema/CreateDatabase"
 
 const labelDesign = "block text-sm font-medium text-gray-700 mb-2"
 const inputDesign = "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 placeholder-gray-400 bg-gray-50 hover:bg-white"
 
-export default function createDatabase() {
+export default function CreateDatabase({
+    databaseName,
+    setDatabaseName
+}: CreateDatabaseProps) {
 
-    const [databaseName, setDatabaseName] = useState<string>("")
     return (
         <div>
             <label htmlFor="databaseName" className={labelDesign}>
