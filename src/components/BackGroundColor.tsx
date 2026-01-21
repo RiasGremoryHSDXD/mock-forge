@@ -1,4 +1,4 @@
-import type { BackgroundColorProps } from "../types/components/ui/Background"
+import type { BackgroundColorProps } from "../types/components/Background"
 
 
 export default function BackGroundColor({
